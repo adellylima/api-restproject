@@ -50,10 +50,6 @@ const Button = styled.button`
   transition: background-color 0.3s ease;
   margin-right: 10px;
 
-  &:hover {
-    background-color: #0056b3;
-  }
-
   &:last-child {
     background-color: #dc3545;
     &:hover {
@@ -73,12 +69,14 @@ const IconButton = styled.button`
 
   &:hover {
     color: #0056b3;
+    background-color: transparent;
   }
 
   &:last-child {
     color: #dc3545;
     &:hover {
       color: #c82333;
+      background-color: transparent;
     }
   }
 `;
