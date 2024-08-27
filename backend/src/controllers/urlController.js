@@ -1,19 +1,40 @@
 const crypto = require("crypto");
 const db = require("../models/database");
+const jwt = require("jsonwebtoken");
+const secretKey = "secret-key";
 
 function generateShortId() {
   return crypto.randomBytes(3).toString("hex");
 }
 
+function getUser(req, res) {
+  const token = req.cookies.token; 
+
+  if (!token) {
+    return res
+      .status(401)
+      .json({ message: "Authentication token is missing." });
+  }
+
+  jwt.verify(token, secretKey, (err, user) => {
+    if (err) {
+     
+      return res.status(403).json({ message: "Invalid token." });
+    }
+    req.user = user;
+  });
+}
+
 exports.shortenUrl = (req, res) => {
   const { url } = req.body;
+  getUser(req, res)
+  const email = req.user ? req.user.email : null;
 
   if (!url) {
     return res.status(400).json({ message: "URL is required." });
   }
 
   const shortId = generateShortId();
-  const email = req.user ? req.user.email : null;
   const lastUpdated = new Date().toISOString();
 
   const query = `INSERT INTO urls (shortId, url, email, accessCount, lastUpdated, deletedAt) VALUES (?, ?, ?, 0, ?, NULL)`;
@@ -21,7 +42,7 @@ exports.shortenUrl = (req, res) => {
     if (err) {
       return res.status(500).json({ message: "Error creating shortened URL." });
     }
-    const shortenedUrl = `http://localhost:8000/${shortId}`;
+    const shortenedUrl = `http://localhost:/${shortId}`;
     res.json({ shortenedUrl });
   });
 };
@@ -93,6 +114,7 @@ exports.listUrls = (req, res) => {
     res.json(rows);
   });
 };
+
 exports.editUrl = (req, res) => {
   const { shortId } = req.params;
   const { newUrl } = req.body;
