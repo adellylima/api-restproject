@@ -91,7 +91,9 @@ function Login() {
         { withCredentials: true } 
       );
       
-      navigate("/shortener");
+      if (response.status === 200) {
+        navigate("/shortener");
+      }
     } catch (err) {
       setError("Invalid credentials. Please try again.");
     }
