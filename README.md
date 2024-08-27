@@ -51,6 +51,7 @@ The frontend is a React application that you can run locally with npm:
 
 3. **Start the frontend application:**:
 
-npm start
-
+   ```bash
+  npm start
+  
 This will start the React development server. The frontend will be accessible at http://localhost:3000.
