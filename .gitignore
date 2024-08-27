@@ -1,0 +1,26 @@
+# Node.js
+node_modules/
+npm-debug.log*
+
+# dotenv environment variables file
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs
+*.log
+log.*
+
+# Editor directories and files
+.vscode/
+.idea/
+
+
+# Build directories
+build/
+dist/
+
+# SQLite database files
+*.sqlite
+*.sqlite3

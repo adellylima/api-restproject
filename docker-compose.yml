@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: api-rest-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    environment:
+      - NODE_ENV=development
+      - JWT_SECRET=secret-key
+
+  db:
+    image: nouchka/sqlite3
+    container_name: sqlite-db
+    volumes:
+      - ./backend/database.sqlite:/app/database.sqlite
+    command: tail -f /dev/null
