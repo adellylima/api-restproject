@@ -5,7 +5,15 @@ const authController = require("../controllers/authController");
 
 jest.mock("bcrypt");
 jest.mock("jsonwebtoken");
-jest.mock("../models/database");
+
+jest.mock("sqlite3", () => {
+  return {
+    Database: jest.fn().mockImplementation(() => ({
+      run: jest.fn((query, params, callback) => callback(null)),
+      get: jest.fn((query, params, callback) => callback(null)),
+    })),
+  };
+});
 
 describe("Auth Controller", () => {
   let req, res, next;
@@ -23,20 +31,32 @@ describe("Auth Controller", () => {
     next = jest.fn();
   });
 
+  const setRequestBody = (email, password) => {
+    req.body = { email, password };
+  };
+
+  const mockJwtVerify = (isValid, payload = null) => {
+    jwt.verify.mockImplementation((token, secret, callback) =>
+      callback(
+        isValid ? null : new Error("Invalid token"),
+        isValid ? payload : null
+      )
+    );
+  };
+
   describe("authenticate", () => {
-    test("should return 401 if token is missing", () => {
+    test("should respond with 401 when no token is provided", () => {
       authController.authenticate(req, res, next);
+
       expect(res.status).toHaveBeenCalledWith(401);
       expect(res.json).toHaveBeenCalledWith({
         message: "Authentication token is missing.",
       });
     });
 
-    test("should return 403 if token is invalid", () => {
+    test("should respond with 403 when token is invalid", () => {
       req.cookies.token = "invalidToken";
-      jwt.verify.mockImplementation((token, secret, callback) =>
-        callback(new Error("Invalid token"), null)
-      );
+      mockJwtVerify(false);
 
       authController.authenticate(req, res, next);
 
@@ -46,8 +66,8 @@ describe("Auth Controller", () => {
   });
 
   describe("register", () => {
-    test("should return 400 if email or password is missing", () => {
-      req.body = {};
+    test("should respond with 400 when email or password is missing", () => {
+      setRequestBody("", "");
 
       authController.register(req, res);
 
@@ -57,8 +77,8 @@ describe("Auth Controller", () => {
       });
     });
 
-    test("should return 500 if database error occurs", () => {
-      req.body = { email: "test@example.com", password: "password123" };
+    test("should respond with 500 when there is a database error", () => {
+      setRequestBody("test@example.com", "password123");
       bcrypt.hashSync.mockReturnValue("hashedPassword");
       db.run.mockImplementation((query, params, callback) =>
         callback(new Error("Database error"))
@@ -72,8 +92,8 @@ describe("Auth Controller", () => {
       });
     });
 
-    test("should return 201 if user is registered successfully", () => {
-      req.body = { email: "test@example.com", password: "password123" };
+    test("should respond with 201 when user is registered successfully", () => {
+      setRequestBody("test@example.com", "password123");
       bcrypt.hashSync.mockReturnValue("hashedPassword");
       db.run.mockImplementation((query, params, callback) => callback(null));
 
@@ -87,8 +107,8 @@ describe("Auth Controller", () => {
   });
 
   describe("login", () => {
-    test("should return 400 if email or password is missing", () => {
-      req.body = {};
+    test("should respond with 400 when email or password is missing", () => {
+      setRequestBody("", "");
 
       authController.login(req, res);
 
@@ -98,8 +118,8 @@ describe("Auth Controller", () => {
       });
     });
 
-    test("should return 500 if database error occurs", () => {
-      req.body = { email: "test@example.com", password: "password123" };
+    test("should respond with 500 when there is a database error", () => {
+      setRequestBody("test@example.com", "password123");
       db.get.mockImplementation((query, params, callback) =>
         callback(new Error("Database error"))
       );
@@ -112,23 +132,31 @@ describe("Auth Controller", () => {
       });
     });
 
-    test("should return 401 if credentials are invalid", () => {
-      req.body = { email: "test@example.com", password: "wrongpassword" };
+    test("should respond with 401 when credentials are invalid", () => {
+      setRequestBody("test@example.com", "wrongpassword");
       db.get.mockImplementation((query, params, callback) =>
-        callback(null, { email: "test@example.com", password: "hashedPassword" })
+        callback(null, {
+          email: "test@example.com",
+          password: "hashedPassword",
+        })
       );
       bcrypt.compareSync.mockReturnValue(false);
 
       authController.login(req, res);
 
       expect(res.status).toHaveBeenCalledWith(401);
-      expect(res.json).toHaveBeenCalledWith({ message: "Invalid credentials." });
+      expect(res.json).toHaveBeenCalledWith({
+        message: "Invalid credentials.",
+      });
     });
 
     test("should log in successfully with valid credentials", () => {
-      req.body = { email: "test@example.com", password: "password123" };
+      setRequestBody("test@example.com", "password123");
       db.get.mockImplementation((query, params, callback) =>
-        callback(null, { email: "test@example.com", password: "hashedPassword" })
+        callback(null, {
+          email: "test@example.com",
+          password: "hashedPassword",
+        })
       );
       bcrypt.compareSync.mockReturnValue(true);
       jwt.sign.mockReturnValue("validToken");
@@ -146,28 +174,24 @@ describe("Auth Controller", () => {
   });
 
   describe("checkAuth", () => {
-    test("should return isAuthenticated false if token is missing", () => {
+    test("should return isAuthenticated false when token is missing", () => {
       authController.checkAuth(req, res);
 
       expect(res.json).toHaveBeenCalledWith({ isAuthenticated: false });
     });
 
-    test("should return isAuthenticated false if token is invalid", () => {
+    test("should return isAuthenticated false when token is invalid", () => {
       req.cookies.token = "invalidToken";
-      jwt.verify.mockImplementation((token, secret, callback) =>
-        callback(new Error("Invalid token"), null)
-      );
+      mockJwtVerify(false);
 
       authController.checkAuth(req, res);
 
       expect(res.json).toHaveBeenCalledWith({ isAuthenticated: false });
     });
 
-    test("should return isAuthenticated true if token is valid", () => {
+    test("should return isAuthenticated true when token is valid", () => {
       req.cookies.token = "validToken";
-      jwt.verify.mockImplementation((token, secret, callback) =>
-        callback(null, { email: "test@example.com" })
-      );
+      mockJwtVerify(true, { email: "test@example.com" });
 
       authController.checkAuth(req, res);
 

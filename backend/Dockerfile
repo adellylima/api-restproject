@@ -13,6 +13,10 @@ RUN npm install
 # Copy the rest of the application code to the working directory
 COPY . .
 
+RUN mkdir -p /db && \
+    touch /db/database.sqlite && \
+    chmod -R 777 /db
+
 # Expose port 8000 to the outside world
 EXPOSE 8000
 
