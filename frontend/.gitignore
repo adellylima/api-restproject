@@ -1,0 +1,26 @@
+# Node.js
+node_modules/
+npm-debug.log*
+
+# Environment variables file
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs
+*.log
+log.*
+
+# Editor directories and files
+.vscode/
+
+# Build directories
+build/
+dist/
+
+# Testing
+__tests__/
+*.spec.js
+*.test.js
+jest/
