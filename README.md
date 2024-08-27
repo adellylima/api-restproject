@@ -18,8 +18,8 @@ The backend runs in a Docker container. Follow these steps to set it up:
 1. **Clone the repository and navigate to the project directory**:
 
    ```bash
-   git clone https://github.com/yourusername/your-repo.git
-   cd your-rep
+   git clone https://github.com/adellylima/api-restproject/api-restproject.git
+   cd api-restproject
 
 
 2. **Build and run the backend using Docker Compose:**:
@@ -46,12 +46,12 @@ The frontend is a React application that you can run locally with npm:
 2. **Install the dependencies:**:
 
    ```bash
-  npm install
+   npm install
 
 
 3. **Start the frontend application:**:
 
    ```bash
-  npm start
+   npm start
   
 This will start the React development server. The frontend will be accessible at http://localhost:3000.
