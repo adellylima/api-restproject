@@ -2,6 +2,9 @@
 
 This project consists of a backend (Node.js) and a frontend (React) for a URL shortener application.
 
+[Gravação de tela de 27-08-2024 18:15:12.webm](https://github.com/user-attachments/assets/751aced0-07bd-4d84-8325-36ea5747de1f)
+
+
 ## Prerequisites
 
 Ensure you have the following installed on your system:
