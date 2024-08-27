@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import styled from "styled-components";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEdit, faTrash, faSave, faTimes } from "@fortawesome/free-solid-svg-icons";
 
 const Container = styled.div`
   max-width: 600px;
@@ -32,25 +34,23 @@ const Input = styled.input`
   border-radius: 4px;
 `;
 
-const Button = styled.button`
-  padding: 10px;
-  font-size: 16px;
-  background-color: #007bff;
-  color: white;
+const IconButton = styled.button`
+  background: none;
   border: none;
-  border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  color: #007bff;
+  font-size: 16px;
+  padding: 5px;
   margin-right: 10px;
 
   &:hover {
-    background-color: #0056b3;
+    color: #0056b3;
   }
 
   &:last-child {
-    background-color: #dc3545;
+    color: #dc3545;
     &:hover {
-      background-color: #c82333;
+      color: #c82333;
     }
   }
 `;
@@ -231,7 +231,9 @@ function UrlShortener() {
           value={url}
           onChange={(e) => setUrl(e.target.value)}
         />
-        <Button type="submit">Shorten URL</Button>
+        <IconButton type="submit">
+          <FontAwesomeIcon icon={faSave} />
+        </IconButton>
       </Form>
       {error && <ErrorMessage>{error}</ErrorMessage>}
       {successMessage && <SuccessMessage>{successMessage}</SuccessMessage>}
@@ -261,8 +263,12 @@ function UrlShortener() {
                       onChange={(e) => setNewUrl(e.target.value)}
                       placeholder="New URL"
                     />
-                    <Button onClick={() => handleEdit(shortId)}>Save</Button>
-                    <Button onClick={() => setEditing(null)}>Cancel</Button>
+                    <IconButton onClick={() => handleEdit(shortId)}>
+                      <FontAwesomeIcon icon={faSave} />
+                    </IconButton>
+                    <IconButton onClick={() => setEditing(null)}>
+                      <FontAwesomeIcon icon={faTimes} />
+                    </IconButton>
                   </>
                 ) : (
                   <>
@@ -282,10 +288,12 @@ function UrlShortener() {
                       </UpdatedTime>
                     </UrlDetails>
                     <div>
-                      <Button onClick={() => setEditing(shortId)}>Edit</Button>
-                      <Button onClick={() => handleDelete(shortId)}>
-                        Delete
-                      </Button>
+                      <IconButton onClick={() => setEditing(shortId)}>
+                        <FontAwesomeIcon icon={faEdit} />
+                      </IconButton>
+                      <IconButton onClick={() => handleDelete(shortId)}>
+                        <FontAwesomeIcon icon={faTrash} />
+                      </IconButton>
                     </div>
                   </>
                 )}
